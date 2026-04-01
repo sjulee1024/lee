@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>법인전환 세금효과 탐색기 | 진산회계법인</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:#1B5E3B;--primary-dark:#0D3B1E;--primary-light:#2D7A4F;
+    --primary-bg:#EEF6F1;--accent:#14522C;--success:#27AE60;
+    --warn:#E67E22;--warn-bg:#FEF8F0;--danger:#C0392B;
+    --bg:#F4F7F5;--card:#fff;--text:#1a1a1a;--text-secondary:#555;
+    --text-muted:#888;--border:#dce8e0;--border-light:#e8f0eb;
+    --radius:12px;--shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .header{background:linear-gradient(135deg,#0D3B1E 0%,#1B5E3B 60%,#2D7A4F 100%);padding:28px 24px 20px;color:#fff;position:relative;overflow:hidden;}
+  .header::after{content:'';position:absolute;top:-60%;right:-15%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%);pointer-events:none;}
+  .header-inner{max-width:800px;margin:0 auto;position:relative;z-index:1;}
+  .header-meta{display:flex;align-items:center;gap:10px;font-size:11px;opacity:.6;letter-spacing:1.2px;margin-bottom:8px;text-transform:uppercase;}
+  .header h1{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px;line-height:1.3;}
+  .header-sub{font-size:12.5px;opacity:.55;}
+  .header-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .h-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:500;}
+  .tabs{background:#fff;border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 8px;position:sticky;top:0;z-index:100;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{padding:14px 20px;border:none;background:transparent;font-size:14px;font-weight:400;color:var(--text-muted);border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit;}
+  .tab-btn.active{font-weight:700;color:var(--primary);border-bottom-color:var(--primary);}
+  .tab-btn:hover{color:var(--primary-light);}
+  .content{max-width:800px;margin:0 auto;padding:24px 16px 40px;}
+  .panel{display:none;animation:fadeIn .3s ease;}.panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .section-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:20px;margin-bottom:16px;}
+  .section-title{font-size:14px;font-weight:700;color:var(--primary-dark);margin-bottom:16px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border-light);}
+  .section-title .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:var(--primary-bg);}
+  .slider-group{margin-bottom:16px;}.slider-group:last-child{margin-bottom:0;}
+  .slider-label-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .slider-label{font-size:13px;font-weight:500;color:var(--text-secondary);}
+  .slider-value{font-size:16px;font-weight:800;color:var(--primary);letter-spacing:-.3px;background:var(--primary-bg);padding:2px 10px;border-radius:6px;}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:#e0e8e3;outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.2);transition:transform .15s;}
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.2);}
+  .slider-range{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px;}
+  .result-banner{background:linear-gradient(135deg,var(--primary-dark),var(--primary));border-radius:var(--radius);padding:22px 24px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden;}
+  .result-banner::after{content:'';position:absolute;top:-50%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(255,255,255,.06),transparent 70%);}
+  .rb-row{display:flex;justify-content:space-between;align-items:flex-end;position:relative;z-index:1;}
+  .rb-label{font-size:12px;opacity:.7;font-weight:500;}.rb-amount{font-size:26px;font-weight:800;letter-spacing:-.5px;margin-top:4px;}
+  .rb-right{text-align:right;}.rb-eff{font-size:18px;font-weight:800;margin-top:4px;}
+  .compare-banner{border-radius:var(--radius);padding:18px 24px;color:#fff;margin-bottom:16px;text-align:center;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(27,94,59,.2);}
+  .compare-banner.positive{background:linear-gradient(135deg,#065F46,#059669);}
+  .compare-banner.negative{background:linear-gradient(135deg,#7F1D1D,#DC2626);}
+  .cb-label{font-size:12px;opacity:.8;}.cb-amount{font-size:28px;font-weight:800;letter-spacing:-.5px;margin:4px 0;position:relative;z-index:1;}.cb-sub{font-size:12px;opacity:.7;}
+  .stats-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .stat-card{flex:1 1 150px;min-width:140px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px 14px;box-shadow:var(--shadow-sm);}
+  .stat-label{font-size:12px;color:var(--text-muted);margin-bottom:4px;}
+  .stat-amount{font-size:20px;font-weight:800;color:var(--text);line-height:1.2;}
+  .stat-sub{font-size:11px;color:var(--primary);margin-top:4px;font-weight:600;}
+  .sum-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+  .sum-head{padding:12px 18px;font-size:13px;font-weight:700;color:var(--primary-dark);background:var(--primary-bg);border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px;}
+  .sum-body{padding:14px 18px;}
+  .sr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f4f1;font-size:13px;}
+  .sr:last-child{border-bottom:none;}.sr .l{color:var(--text-secondary);font-weight:500;}.sr .v{font-weight:700;color:var(--text);}
+  .sr.sub{padding-left:16px;}.sr.sub .l{font-size:12px;color:var(--text-muted);}.sr.sub .v{font-size:12px;color:var(--text-secondary);font-weight:500;}
+  .sr.total{margin-top:6px;padding-top:10px;border-top:2px solid var(--primary-bg);border-bottom:none;}
+  .sr.total .l{font-weight:700;color:var(--text);font-size:14px;}.sr.total .v{font-size:18px;color:var(--primary);font-weight:800;}
+  .accordion{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-sm);}
+  .accordion-header{width:100%;padding:13px 18px;border:none;background:transparent;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:600;color:var(--primary-dark);cursor:pointer;font-family:inherit;transition:background .15s;}
+  .accordion-header:hover{background:var(--primary-bg);}
+  .accordion-chevron{width:18px;height:18px;color:var(--text-muted);transition:transform .25s ease;}
+  .accordion.open .accordion-chevron{transform:rotate(180deg);}
+  .accordion-body{display:none;padding:14px 18px;border-top:1px solid var(--border-light);}
+  .accordion.open .accordion-body{display:block;}
+  .step{margin-bottom:6px;padding:8px 12px;background:#f7faf8;border-radius:8px;border-left:3px solid var(--primary-light);}
+  .step-l{font-size:11px;font-weight:600;color:var(--text-muted);}
+  .step-c{font-size:12.5px;color:var(--text-secondary);margin-top:1px;}
+  .step-r{font-size:13px;font-weight:700;color:var(--primary-dark);margin-top:1px;}
+  .rate-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow-sm);}
+  .rate-head{padding:10px 16px;font-size:12px;font-weight:700;color:#fff;background:var(--primary);}
+  .rate-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+  .rate-tbl th{background:#f3f7f4;padding:6px 10px;text-align:left;font-weight:600;color:var(--text-muted);font-size:11px;border-bottom:1px solid var(--border-light);}
+  .rate-tbl td{padding:5px 10px;border-bottom:1px solid #f0f4f1;color:var(--text-secondary);}
+  .rate-tbl tr:last-child td{border-bottom:none;}
+  .rate-tbl tr.hl{background:var(--primary-bg);font-weight:600;}.rate-tbl tr.hl td{color:var(--primary-dark);}
+  .rate-grid{display:grid;gap:12px;margin-top:16px;}
+  .rate-grid.cols-2{grid-template-columns:1fr 1fr;}.rate-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  .sync-indicator{display:flex;align-items:center;gap:6px;background:#EEF6F1;border:1px solid #c8e0d0;border-radius:8px;padding:8px 14px;margin-bottom:14px;font-size:12px;color:var(--primary);font-weight:500;}
+  .sync-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .info-box{border-radius:10px;padding:16px 18px;font-size:13px;line-height:1.7;margin-bottom:16px;}
+  .info-box.green{background:#EEF6F1;border:1px solid #c8e0d0;color:#1a4d2e;}
+  .info-box.yellow{background:var(--warn-bg);border:1px solid #f0d9a0;color:#7a5c20;}
+  .info-box strong{display:block;margin-bottom:4px;}
+  .retire-highlight{background:linear-gradient(135deg,#f0f7f2,#e2efe6);border:1px solid #c0d8c8;border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;}
+  .retire-highlight .rh-title{font-size:14px;font-weight:700;color:var(--primary-dark);margin-bottom:10px;}
+  .retire-row{display:flex;gap:16px;flex-wrap:wrap;}
+  .retire-metric{flex:1;min-width:130px;background:rgba(255,255,255,.7);border-radius:10px;padding:14px;text-align:center;}
+  .retire-metric .rm-label{font-size:11px;color:var(--text-muted);}
+  .retire-metric .rm-value{font-size:18px;font-weight:800;color:var(--primary-dark);margin-top:2px;}
+  .retire-metric .rm-sub{font-size:10px;color:var(--primary);margin-top:2px;}
+  .note-box{background:var(--primary-bg);border:1px solid #c8e0d0;border-radius:var(--radius);padding:16px 18px;margin-top:20px;font-size:11.5px;color:#2d5040;line-height:1.75;}
+  .note-box b{color:var(--primary-dark);}
+  .cta-box{background:var(--card);border-radius:var(--radius);border:1.5px solid #c8e0d0;padding:20px;margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .cta-text{font-size:13px;color:var(--text-secondary);line-height:1.6;}.cta-text b{color:var(--primary);}
+  .cta-btn{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;box-shadow:0 3px 10px rgba(27,94,59,.2);transition:transform .15s,box-shadow .15s;}
+  .cta-btn:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(27,94,59,.3);}
+  .footer{text-align:center;padding:20px;font-size:11px;color:var(--text-muted);line-height:1.8;max-width:800px;margin:0 auto;}.footer b{color:var(--text-secondary);}
+  @media(max-width:640px){
+    .header h1{font-size:19px;}.content{padding:16px 12px 32px;}.stats-row{gap:8px;}.stat-card{padding:12px 10px;}.stat-amount{font-size:16px;}
+    .rate-grid.cols-2,.rate-grid.cols-3{grid-template-columns:1fr;}.rb-row{flex-direction:column;align-items:flex-start;gap:6px;}.rb-right{text-align:left;}
+    .cta-box{flex-direction:column;text-align:center;}.retire-row{gap:8px;}.retire-metric{min-width:100px;padding:10px;}.retire-metric .rm-value{font-size:15px;}
+  }
+</style>
+</head>
+<body>
+<div class="header"><div class="header-inner">
+  <div class="header-meta"><span>━</span> JINSAN TAX SIMULATOR</div>
+  <h1>법인전환 세금효과 탐색기</h1>
+  <div class="header-sub">개인사업자 vs 법인사업자 세부담 비교 시뮬레이션</div>
+  <div class="header-badges"><span class="h-badge">2026년 세법 기준</span><span class="h-badge">진산회계법인 이상준 세무사</span></div>
+</div></div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="0">👤 개인사업자</button>
+  <button class="tab-btn" data-tab="1">🏢 법인사업자</button>
+  <button class="tab-btn" data-tab="2">📊 비교 분석</button>
+</div>
+
+<div class="content">
+  <!-- 개인사업자 -->
+  <div class="panel active" id="panel-0">
+    <div class="section-card"><div class="section-title"><div class="icon">📊</div> 사업 현황 입력</div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">연 매출액</span><span class="slider-value" id="i_rev_v">5억원</span></div><input type="range" id="i_rev" min="1" max="1000" value="50" oninput="onIndvChange()"><div class="slider-range"><span>1,000만원</span><span>100억원</span></div></div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">연 비용 (인건비·임차료 등)</span><span class="slider-value" id="i_exp_v">3억원</span></div><input type="range" id="i_exp" min="0" max="500" value="30" oninput="onIndvChange()"><div class="slider-range"><span>0원</span><span>50억원</span></div></div>
+    </div>
+    <div class="result-banner" id="iBanner"></div>
+    <div class="stats-row" id="iStats"></div>
+    <div class="sum-card"><div class="sum-head">📋 세부담 내역</div><div class="sum-body" id="iSum"></div></div>
+    <div class="accordion" id="iDetailAcc"><button class="accordion-header" onclick="togAcc(this)"><span>계산 과정 상세</span><svg class="accordion-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body" id="iDetail"></div></div>
+    <div class="rate-grid cols-2" id="iRates"></div>
+  </div>
+
+  <!-- 법인사업자 -->
+  <div class="panel" id="panel-1">
+    <div class="sync-indicator"><span class="sync-dot"></span> 매출·비용이 개인사업자 탭과 동기화됩니다</div>
+    <div class="section-card"><div class="section-title"><div class="icon">🏢</div> 법인 현황</div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">연 매출액</span><span class="slider-value" id="c_rev_v">5억원</span></div><input type="range" id="c_rev" min="1" max="1000" value="50" disabled style="opacity:.5;cursor:default;"><div class="slider-range"><span>1,000만원</span><span>100억원</span></div></div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">연 비용 (급여·퇴직금·배당 제외)</span><span class="slider-value" id="c_exp_v">3억원</span></div><input type="range" id="c_exp" min="0" max="500" value="30" disabled style="opacity:.5;cursor:default;"><div class="slider-range"><span>0원</span><span>50억원</span></div></div>
+    </div>
+    <div class="section-card"><div class="section-title"><div class="icon">💼</div> 대표자 보수 설계</div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">대표자 연 급여</span><span class="slider-value" id="c_sal_v">1억원</span></div><input type="range" id="c_sal" min="1" max="200" value="10" oninput="calcC()"><div class="slider-range"><span>1,000만원</span><span>20억원</span></div></div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">대표자 연 배당금</span><span class="slider-value" id="c_div_v">2,000만원</span></div><input type="range" id="c_div" min="0" max="100" value="2" oninput="calcC()"><div class="slider-range"><span>0원</span><span>10억원</span></div></div>
+    </div>
+    <div class="section-card"><div class="section-title"><div class="icon">🏦</div> 퇴직급여 설계</div>
+      <div class="info-box green"><strong>💡 임원 퇴직급여란?</strong>법인 대표이사는 퇴직 시 퇴직급여를 법인 비용(손금)으로 처리할 수 있습니다. 매년 추정 퇴직급여를 충당부채로 설정하면 법인세 절세 효과가 있고, 퇴직소득세는 분류과세로 세율이 낮습니다.</div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">퇴직급여 기준 연봉</span><span class="slider-value" id="c_ret_sal_v">1억원</span></div><input type="range" id="c_ret_sal" min="0" max="200" value="10" oninput="calcC()"><div class="slider-range"><span>0원 (미설정)</span><span>20억원</span></div></div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">퇴직급여 배수</span><span class="slider-value" id="c_ret_mult_v">1배수</span></div><input type="range" id="c_ret_mult" min="10" max="30" value="10" step="5" oninput="calcC()"><div class="slider-range"><span>1배수</span><span>3배수</span></div></div>
+      <div class="slider-group"><div class="slider-label-row"><span class="slider-label">예상 근속기간</span><span class="slider-value" id="c_ret_year_v">10년</span></div><input type="range" id="c_ret_year" min="1" max="30" value="10" oninput="calcC()"><div class="slider-range"><span>1년</span><span>30년</span></div></div>
+    </div>
+    <div id="retireHighlight"></div>
+    <div id="cmpBanner" style="display:none;"></div>
+    <div class="result-banner" id="cBanner"></div>
+    <div class="stats-row" id="cStats"></div>
+    <div class="sum-card"><div class="sum-head">🏢 법인 단계 세부담</div><div class="sum-body" id="cCorpSum"></div></div>
+    <div class="sum-card"><div class="sum-head">💼 대표자 개인 세부담</div><div class="sum-body" id="cCeoSum"></div></div>
+    <div class="accordion"><button class="accordion-header" onclick="togAcc(this)"><span>법인세 계산 상세</span><svg class="accordion-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body" id="cDetailTax"></div></div>
+    <div class="accordion"><button class="accordion-header" onclick="togAcc(this)"><span>대표자 소득세 상세</span><svg class="accordion-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body" id="cDetailCeo"></div></div>
+    <div class="accordion"><button class="accordion-header" onclick="togAcc(this)"><span>4대보험 상세</span><svg class="accordion-chevron" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="accordion-body" id="cDetailIns"></div></div>
+    <div class="rate-grid cols-3" id="cRates"></div>
+  </div>
+
+  <!-- 비교 분석 -->
+  <div class="panel" id="panel-2"><div id="compareContent"></div></div>
+
+  <div class="note-box">
+    <b>⚠️ 유의사항</b><br>
+    · 2026년 귀속 기준 <b>추정치</b>이며, 실제 세부담은 개별 상황에 따라 달라집니다.<br>
+    · 개인: 기본공제 150만 + 표준세액공제 7만 / 법인 대표자: 근로소득공제 + 기본공제 150만 + 표준세액공제 13만<br>
+    · 법인세율: 2026년 전 구간 1%p 인상 반영 (10%/20%/22%/25%)<br>
+    · 국민연금 9.5% (상한 월 637만), 건강보험 7.19%, 장기요양 13.14%<br>
+    · 배당 2,000만원 초과 시 금융소득종합과세 적용<br>
+    · 4대보험 사업주 부담분은 법인 비용(손금)으로 인정되어 법인세 계산 시 비용에 포함됩니다.<br>
+    · 임원 퇴직급여는 정관에 규정된 지급배수 한도 내에서 손금 인정됩니다.
+  </div>
+  <div class="cta-box">
+    <div class="cta-text">법인전환, 어떻게 시작해야 할까요?<br><b>진산회계법인 이상준 세무사</b>가 맞춤 상담해 드립니다.</div>
+    <a href="tel:010-3038-1024" class="cta-btn">📞 상담 문의</a>
+  </div>
+  <div class="footer">본 자료는 일반적인 세법 해석을 정리한 것으로, 구체적인 사안에 대해서는 별도 검토가 필요합니다.<br>© 2026 <b>진산회계법인</b> · 파트너 세무사 이상준 · 서울 영등포구 여의도 · ☎ 010-3038-1024</div>
+</div>
+
+<script>
+const IT=[{mn:0,mx:14e6,r:.06,d:0},{mn:14e6,mx:5e7,r:.15,d:126e4},{mn:5e7,mx:88e6,r:.24,d:576e4},{mn:88e6,mx:15e7,r:.35,d:1544e4},{mn:15e7,mx:3e8,r:.38,d:1994e4},{mn:3e8,mx:5e8,r:.40,d:2594e4},{mn:5e8,mx:1e9,r:.42,d:3594e4},{mn:1e9,mx:1/0,r:.45,d:6594e4}];
+const CT=[{mn:0,mx:2e8,r:.10,d:0},{mn:2e8,mx:2e10,r:.20,d:2e7},{mn:2e10,mx:3e11,r:.22,d:42e7},{mn:3e11,mx:1/0,r:.25,d:942e7}];
+function tx(t,tbl){if(t<=0)return 0;for(let i=tbl.length-1;i>=0;i--)if(t>tbl[i].mn)return t*tbl[i].r-tbl[i].d;return 0;}
+function fb(t,tbl){for(let i=tbl.length-1;i>=0;i--)if(t>tbl[i].mn)return tbl[i];return tbl[0];}
+function ed(s){if(s<=5e6)return s*.7;if(s<=15e6)return 35e5+(s-5e6)*.4;if(s<=45e6)return 75e5+(s-15e6)*.15;if(s<=1e8)return 12e6+(s-45e6)*.05;return 1475e4+(s-1e8)*.02;}
+function sv(u){return u*1e7;}
+function f(n){if(n===0)return'0원';const a=Math.abs(n),s=n<0?'-':'';if(a>=1e8){const e=Math.floor(a/1e8),m=Math.floor((a%1e8)/1e4);return m>0?s+e.toLocaleString()+'억 '+m.toLocaleString()+'만원':s+e.toLocaleString()+'억원';}if(a>=1e4)return s+Math.floor(a/1e4).toLocaleString()+'만원';return s+Math.round(a).toLocaleString()+'원';}
+
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('panel-'+b.dataset.tab).classList.add('active');
+  if(b.dataset.tab==='2')buildCompare();
+}));
+function togAcc(el){el.closest('.accordion').classList.toggle('open');}
+
+function rtHtml(tbl,br,title){let rows='';tbl.forEach(b=>{const hl=b===br;const mx=b.mx===1/0?'':f(b.mx)+' 이하';const mn=b.mn===0?'':f(b.mn)+' 초과';const rng=b.mn===0?mx:(b.mx===1/0?mn:mn+' ~ '+f(b.mx)+' 이하');rows+=`<tr class="${hl?'hl':''}"><td>${rng}</td><td>${(b.r*100).toFixed(0)}%</td><td>${b.d>0?f(b.d):'-'}</td></tr>`;});return`<div class="rate-card"><div class="rate-head">${title}</div><table class="rate-tbl"><thead><tr><th>과세표준</th><th>세율</th><th>누진공제</th></tr></thead><tbody>${rows}</tbody></table></div>`;}
+function insHtml(){return`<div class="rate-card"><div class="rate-head">4대보험 요율 (2026년)</div><table class="rate-tbl"><thead><tr><th>항목</th><th>근로자</th><th>사업주</th></tr></thead><tbody><tr><td>국민연금</td><td>4.75%</td><td>4.75%</td></tr><tr><td>건강보험</td><td>3.595%</td><td>3.595%</td></tr><tr><td>장기요양</td><td colspan="2" style="text-align:center">건보료×13.14%</td></tr><tr><td>고용보험</td><td>0.9%</td><td>0.9%~</td></tr><tr><td>산재보험</td><td>-</td><td>0.7%~</td></tr><tr class="hl"><td>연금상한</td><td colspan="2" style="text-align:center">월 637만원</td></tr></tbody></table></div>`;}
+
+let lastI=null,lastC=null;
+
+function onIndvChange(){
+  const rv=document.getElementById('i_rev').value,ev=document.getElementById('i_exp').value;
+  document.getElementById('c_rev').value=rv;document.getElementById('c_exp').value=ev;
+  document.getElementById('c_rev_v').textContent=f(sv(+rv));document.getElementById('c_exp_v').textContent=f(sv(+ev));
+  calcI();calcC();
+}
+
+function calcI(){
+  const rev=sv(+document.getElementById('i_rev').value),exp=sv(+document.getElementById('i_exp').value);
+  document.getElementById('i_rev_v').textContent=f(rev);document.getElementById('i_exp_v').textContent=f(exp);
+  const bi=Math.max(0,rev-exp),txbl=Math.max(0,bi-15e5);
+  const raw=tx(txbl,IT),fin=Math.max(0,raw-7e4),loc=fin*.1,totTax=fin+loc;
+  const hm=bi/12*.0719,hc=Math.min(hm,43e5),ltc=hc*.1314,health=(hc+ltc)*12;
+  const pm=Math.min(bi/12,637e4)*.095,pension=pm*12;
+  const total=totTax+health+pension;
+  lastI={rev,exp,bi,txbl,fin,loc,totTax,health,pension,total};
+  const br=fb(txbl,IT);
+  document.getElementById('iBanner').innerHTML=`<div class="rb-row"><div><div class="rb-label">개인사업자 연간 총 세부담</div><div class="rb-amount">${f(total)}</div></div><div class="rb-right"><div class="rb-label">실효부담률</div><div class="rb-eff">${bi>0?(total/bi*100).toFixed(1):0}%</div></div></div>`;
+  document.getElementById('iStats').innerHTML=`<div class="stat-card"><div class="stat-label">사업소득</div><div class="stat-amount">${f(bi)}</div><div class="stat-sub">매출 − 비용</div></div><div class="stat-card"><div class="stat-label">종합소득세+지방세</div><div class="stat-amount">${f(totTax)}</div><div class="stat-sub">적용세율 ${(br.r*100).toFixed(0)}%</div></div><div class="stat-card"><div class="stat-label">건보+연금</div><div class="stat-amount">${f(health+pension)}</div><div class="stat-sub">지역가입자 전액부담</div></div>`;
+  document.getElementById('iSum').innerHTML=`<div class="sr"><span class="l">사업소득 (매출−비용)</span><span class="v" style="color:var(--primary)">${f(bi)}</span></div><div class="sr"><span class="l">종합소득세 (${(br.r*100).toFixed(0)}%)</span><span class="v">${f(fin)}</span></div><div class="sr"><span class="l">지방소득세 (10%)</span><span class="v">${f(loc)}</span></div><div class="sr"><span class="l">건강보험+장기요양 (지역)</span><span class="v">${f(health)}</span></div><div class="sr"><span class="l">국민연금 (전액 본인 9.5%)</span><span class="v">${f(pension)}</span></div><div class="sr total"><span class="l">총 세부담</span><span class="v">${f(total)}</span></div>`;
+  document.getElementById('iDetail').innerHTML=`<div class="step"><div class="step-l">① 사업소득</div><div class="step-c">${f(rev)} − ${f(exp)}</div><div class="step-r">= ${f(bi)}</div></div><div class="step"><div class="step-l">② 과세표준</div><div class="step-c">${f(bi)} − 기본공제 150만</div><div class="step-r">= ${f(txbl)}</div></div><div class="step"><div class="step-l">③ 산출세액 (${(br.r*100).toFixed(0)}%)</div><div class="step-c">${f(txbl)} × ${(br.r*100).toFixed(0)}% − ${f(br.d)}</div><div class="step-r">= ${f(raw)}</div></div><div class="step"><div class="step-l">④ 결정세액</div><div class="step-c">산출세액 − 표준세액공제 7만</div><div class="step-r">= ${f(fin)}</div></div><div class="step"><div class="step-l">⑤ 건보 (지역가입자)</div><div class="step-c">소득월액 × 7.19% + 장기요양 13.14%</div><div class="step-r">= 연 ${f(health)}</div></div><div class="step"><div class="step-l">⑥ 국민연금 (9.5% 전액)</div><div class="step-c">min(소득월액, 637만) × 9.5% × 12</div><div class="step-r">= 연 ${f(pension)}</div></div>`;
+  document.getElementById('iRates').innerHTML=rtHtml(IT,br,'종합소득세율 (2026년)')+`<div class="rate-card"><div class="rate-head">4대보험 (개인사업자)</div><table class="rate-tbl"><thead><tr><th>항목</th><th>요율</th><th>비고</th></tr></thead><tbody><tr><td>국민연금</td><td>9.5%</td><td>전액 본인부담</td></tr><tr><td>건강보험</td><td>7.19%</td><td>지역가입자</td></tr><tr><td>장기요양</td><td>건보료×13.14%</td><td></td></tr><tr class="hl"><td>연금상한</td><td colspan="2">월 637만원</td></tr></tbody></table></div>`;
+}
+
+function calcC(){
+  const rev=sv(+document.getElementById('c_rev').value),exp=sv(+document.getElementById('c_exp').value);
+  const sal=sv(+document.getElementById('c_sal').value),div=sv(+document.getElementById('c_div').value);
+  const retSalBase=sv(+document.getElementById('c_ret_sal').value);
+  const retMult=+document.getElementById('c_ret_mult').value/10;
+  const retYear=+document.getElementById('c_ret_year').value;
+  document.getElementById('c_rev_v').textContent=f(rev);document.getElementById('c_exp_v').textContent=f(exp);
+  document.getElementById('c_sal_v').textContent=f(sal);document.getElementById('c_div_v').textContent=f(div);
+  document.getElementById('c_ret_sal_v').textContent=retSalBase===0?'미설정':f(retSalBase);
+  document.getElementById('c_ret_mult_v').textContent=retMult+'배수';
+  document.getElementById('c_ret_year_v').textContent=retYear+'년';
+
+  // 4대보험
+  const npm=Math.min(sal/12,637e4);
+  const npE=npm*.0475*12,npR=npE,hE=sal/12*.03595*12,hR=hE,ltE=hE*.1314,ltR=hR*.1314;
+  const emE=sal*.009,emR=emE,ind=sal*.007;
+  const insE=npE+hE+ltE+emE,insR=npR+hR+ltR+emR+ind,insT=insE+insR;
+
+  // 퇴직급여: (기준연봉/12) × 배수 × 근속연수
+  const totalRetire=retSalBase>0?(retSalBase/12)*retMult*retYear:0;
+  const annualRetire=retSalBase>0?totalRetire/retYear:0;
+
+  // 법인세 (사업주 4대보험 + 퇴직충당금 비용 포함)
+  const ctxbl=Math.max(0,rev-exp-sal-insR-annualRetire);
+  const ct=tx(ctxbl,CT),cl=ct*.1,ctT=ct+cl;
+
+  // 대표자 소득세
+  const eDed=ed(sal),ei=sal-eDed,cTx=Math.max(0,ei-15e5);
+  const withheld=div*.154;
+  let ceoTot,divD;
+  if(div<=2e7){const raw=tx(cTx,IT),fin2=Math.max(0,raw-13e4),loc2=fin2*.1;ceoTot=fin2+loc2+withheld;divD={t:'분리과세',tax:withheld};}
+  else{const exc=div-2e7,gu=exc*.11,comp=cTx+exc+gu,compTax=tx(comp,IT),b14=2e7*.14,eOnly=tx(cTx,IT),compare=eOnly+b14,final2=Math.max(compTax,compare)-gu-13e4,cFin=Math.max(0,final2),cLoc=cFin*.1;ceoTot=cFin+cLoc;const divTax=ceoTot-(Math.max(0,eOnly-13e4)*1.1);divD={t:'금융소득종합과세',tax:Math.max(0,divTax)};}
+
+  // 퇴직소득세
+  let retireTax=0,retireDetail='';
+  if(totalRetire>0){
+    let td;if(retYear<=5)td=retYear*1e6;else if(retYear<=10)td=5e6+(retYear-5)*2e6;else if(retYear<=20)td=15e6+(retYear-10)*25e5;else td=4e7+(retYear-20)*3e6;
+    const envBase=Math.max(0,totalRetire-td),annEnv=envBase/retYear,converted=annEnv*12;
+    const envTax=tx(converted,IT)/12*retYear;retireTax=Math.max(0,envTax)*.7;const retLoc=retireTax*.1;retireTax+=retLoc;
+    retireDetail=`퇴직금 ${f(totalRetire)} · 근속공제 ${f(td)} · 퇴직소득세+지방세 ≈ ${f(retireTax)}`;
+  }
+
+  const total=ctT+ceoTot+insT;
+  const bi=Math.max(0,rev-exp);
+  lastC={rev,exp,sal,div,bi,ctxbl,ct,cl,ctT,ceoTot,insT,insE,insR,total,annualRetire,totalRetire,retireTax,retireYear:retYear,divD};
+
+  // 퇴직급여 하이라이트
+  const rh=document.getElementById('retireHighlight');
+  if(totalRetire>0){rh.innerHTML=`<div class="retire-highlight"><div class="rh-title">🏦 퇴직급여 시뮬레이션 결과</div><div class="retire-row"><div class="retire-metric"><div class="rm-label">총 퇴직급여</div><div class="rm-value">${f(totalRetire)}</div><div class="rm-sub">${retYear}년 근속 · ${retMult}배수</div></div><div class="retire-metric"><div class="rm-label">연간 충당금 (법인비용)</div><div class="rm-value">${f(annualRetire)}</div><div class="rm-sub">매년 손금산입</div></div><div class="retire-metric"><div class="rm-label">퇴직소득세 (퇴직시)</div><div class="rm-value">${f(retireTax)}</div><div class="rm-sub">분류과세 (70% 적용)</div></div></div></div>`;}else{rh.innerHTML='';}
+
+  // 비교 배너
+  const cb=document.getElementById('cmpBanner');
+  if(lastI){const saving=lastI.total-total,pctV=lastI.total>0?(saving/lastI.total*100).toFixed(1):0;cb.style.display='block';cb.className=saving>=0?'compare-banner positive':'compare-banner negative';cb.innerHTML=`<div class="cb-label">개인사업자 대비 절감액</div><div class="cb-amount">${saving>=0?'▼':'▲'} ${f(Math.abs(saving))}</div><div class="cb-sub">${saving>=0?pctV+'% 절감':'세부담 '+Math.abs(pctV)+'% 증가 — 급여·배당 조정 필요'}</div>`;}else{cb.style.display='none';}
+
+  document.getElementById('cBanner').innerHTML=`<div class="rb-row"><div><div class="rb-label">법인사업자 연간 총 세부담</div><div class="rb-amount">${f(total)}</div></div><div class="rb-right"><div class="rb-label">실효부담률</div><div class="rb-eff">${bi>0?(total/bi*100).toFixed(1):0}%</div></div></div>`;
+
+  const corpBr=fb(ctxbl,CT),ceoBr=fb(cTx,IT);
+  document.getElementById('cStats').innerHTML=`<div class="stat-card"><div class="stat-label">법인세+지방세</div><div class="stat-amount">${f(ctT)}</div><div class="stat-sub">세율 ${(corpBr.r*100)}%</div></div><div class="stat-card"><div class="stat-label">대표자 소득세</div><div class="stat-amount">${f(ceoTot)}</div><div class="stat-sub">${divD.t}</div></div><div class="stat-card"><div class="stat-label">4대보험 합계</div><div class="stat-amount">${f(insT)}</div><div class="stat-sub">근로자+사업주</div></div>`;
+  document.getElementById('cCorpSum').innerHTML=`<div class="sr"><span class="l">과세표준</span><span class="v">${f(ctxbl)}</span></div><div class="sr sub"><span class="l">매출 ${f(rev)} − 비용 ${f(exp)} − 급여 ${f(sal)}</span><span class="v"></span></div>${annualRetire>0?`<div class="sr sub"><span class="l">− 퇴직충당금 ${f(annualRetire)} − 사업주 4대보험 ${f(insR)}</span><span class="v"></span></div>`:`<div class="sr sub"><span class="l">− 사업주 4대보험 ${f(insR)}</span><span class="v"></span></div>`}<div class="sr"><span class="l">법인세 (${(corpBr.r*100)}%)</span><span class="v">${f(ct)}</span></div><div class="sr"><span class="l">지방소득세</span><span class="v">${f(cl)}</span></div><div class="sr total"><span class="l">법인 소계</span><span class="v">${f(ctT)}</span></div>`;
+  document.getElementById('cCeoSum').innerHTML=`<div class="sr"><span class="l">근로소득세+지방세</span><span class="v">${f(Math.max(0,ceoTot-divD.tax))}</span></div><div class="sr"><span class="l">배당세 (${divD.t})</span><span class="v">${f(divD.tax)}</span></div><div class="sr"><span class="l">4대보험 (근로자분)</span><span class="v">${f(insE)}</span></div><div class="sr"><span class="l">4대보험 (사업주분 = 법인비용)</span><span class="v">${f(insR)}</span></div><div class="sr total"><span class="l">대표자+4대보험 소계</span><span class="v">${f(ceoTot+insT)}</span></div>`;
+  document.getElementById('cDetailTax').innerHTML=`<div class="step"><div class="step-l">① 과세표준</div><div class="step-c">${f(rev)} − ${f(exp)} − 급여 ${f(sal)} − 사업주4대보험 ${f(insR)}${annualRetire>0?' − 퇴직충당금 '+f(annualRetire):''}</div><div class="step-r">= ${f(ctxbl)}</div></div><div class="step"><div class="step-l">② 법인세 (${(corpBr.r*100)}%)</div><div class="step-c">${f(ctxbl)} × ${(corpBr.r*100)}% − ${f(corpBr.d)}</div><div class="step-r">= ${f(ct)} (+지방 ${f(cl)})</div></div><div class="step"><div class="step-l">💡 사업주 4대보험</div><div class="step-c">법인 비용(손금) 인정 → 법인세 과세표준 감소</div><div class="step-r">${f(insR)} 절세효과</div></div>${annualRetire>0?`<div class="step"><div class="step-l">💡 퇴직충당금</div><div class="step-c">연간 ${f(annualRetire)} 손금산입 → 법인세 과세표준 감소</div><div class="step-r">${f(annualRetire)} 절세효과</div></div>`:''}`;
+  document.getElementById('cDetailCeo').innerHTML=`<div class="step"><div class="step-l">① 근로소득공제</div><div class="step-c">급여 ${f(sal)} → 공제 ${f(eDed)}</div><div class="step-r">근로소득금액 = ${f(ei)}</div></div><div class="step"><div class="step-l">② 과세표준</div><div class="step-c">${f(ei)} − 기본공제 150만</div><div class="step-r">= ${f(cTx)}</div></div><div class="step"><div class="step-l">③ 배당소득세</div><div class="step-c">${div<=2e7?f(div)+' × 15.4% 분리과세':'2,000만원 초과 → 종합과세'}</div><div class="step-r">= ${f(divD.tax)}</div></div><div class="step"><div class="step-l">④ 소득세+지방세 합계</div><div class="step-r">= ${f(ceoTot)}</div></div>${totalRetire>0?`<div class="step" style="border-left-color:var(--warn);"><div class="step-l">⑤ 퇴직소득세 (퇴직 시 발생)</div><div class="step-c">${retireDetail}</div><div class="step-r">분류과세 ≈ ${f(retireTax)}</div></div>`:''}`;
+  document.getElementById('cDetailIns').innerHTML=`<div class="step"><div class="step-l">국민연금</div><div class="step-c">근로자 ${f(npE)} + 사업주 ${f(npR)}</div><div class="step-r">= ${f(npE+npR)}</div></div><div class="step"><div class="step-l">건강보험+장기요양</div><div class="step-c">근로자 ${f(hE+ltE)} + 사업주 ${f(hR+ltR)}</div><div class="step-r">= ${f(hE+ltE+hR+ltR)}</div></div><div class="step"><div class="step-l">고용+산재</div><div class="step-c">근로자 ${f(emE)} + 사업주 ${f(emR+ind)}</div><div class="step-r">= ${f(emE+emR+ind)}</div></div><div class="step" style="border-left-color:var(--primary-dark);"><div class="step-l" style="color:var(--primary-dark)">합계</div><div class="step-c">근로자 ${f(insE)} + 사업주 ${f(insR)} <span style="color:var(--primary);font-weight:600">(사업주분 법인비용)</span></div><div class="step-r" style="font-size:14px">= ${f(insT)}</div></div>`;
+  document.getElementById('cRates').innerHTML=rtHtml(CT,corpBr,'법인세율 (2026년~)')+rtHtml(IT,ceoBr,'종합소득세율 (2026년)')+insHtml();
+}
+
+function buildCompare(){
+  if(!lastI||!lastC)return;
+  const saving=lastI.total-lastC.total,pctV=lastI.total>0?(saving/lastI.total*100).toFixed(1):0,isP=saving>=0;
+  let retSec='';
+  if(lastC.totalRetire>0){retSec=`<div class="section-card" style="margin-top:16px;"><div class="section-title"><div class="icon">🏦</div> 퇴직급여 효과</div><div class="sr"><span class="l">총 퇴직급여 (${lastC.retireYear}년)</span><span class="v">${f(lastC.totalRetire)}</span></div><div class="sr"><span class="l">연간 법인비용 처리 (충당금)</span><span class="v" style="color:var(--primary)">${f(lastC.annualRetire)}</span></div><div class="sr"><span class="l">퇴직소득세 (퇴직 시)</span><span class="v">${f(lastC.retireTax)}</span></div><div class="sr"><span class="l">실효세율 (퇴직소득세/퇴직금)</span><span class="v" style="color:var(--primary)">${lastC.totalRetire>0?(lastC.retireTax/lastC.totalRetire*100).toFixed(1):0}%</span></div><div class="info-box green" style="margin-top:12px;"><strong>💡 퇴직급여 절세 포인트</strong>개인사업자는 본인 퇴직금을 비용처리할 수 없지만, 법인 대표이사는 퇴직급여를 법인 비용으로 처리하여 법인세를 줄이고, 퇴직 시에는 분류과세(낮은 세율)로 수령할 수 있습니다.</div></div>`;}
+  document.getElementById('compareContent').innerHTML=`<div class="compare-banner ${isP?'positive':'negative'}"><div class="cb-label">개인사업자 대비 법인전환 시</div><div class="cb-amount">${isP?'▼':'▲'} ${f(Math.abs(saving))}</div><div class="cb-sub">${isP?pctV+'% 절감':'세부담 '+Math.abs(pctV)+'% 증가'}</div></div><div class="stats-row"><div class="stat-card"><div class="stat-label">개인사업자</div><div class="stat-amount" style="color:#888">${f(lastI.total)}</div><div class="stat-sub" style="color:#888">실효 ${lastI.bi>0?(lastI.total/lastI.bi*100).toFixed(1):0}%</div></div><div class="stat-card" style="border-color:var(--primary);"><div class="stat-label">법인사업자</div><div class="stat-amount" style="color:var(--primary)">${f(lastC.total)}</div><div class="stat-sub">실효 ${lastC.bi>0?(lastC.total/lastC.bi*100).toFixed(1):0}%</div></div></div><div class="sum-card"><div class="sum-head">📊 항목별 비교</div><div class="sum-body"><div class="sr" style="font-weight:600;color:var(--text-muted);font-size:12px;border-bottom:2px solid var(--border-light);"><span class="l">항목</span><span class="v" style="display:flex;gap:28px;"><span style="min-width:70px;text-align:right">개인</span><span style="min-width:70px;text-align:right">법인</span></span></div><div class="sr"><span class="l">소득세+지방세</span><span class="v" style="display:flex;gap:28px;"><span style="min-width:70px;text-align:right">${f(lastI.totTax)}</span><span style="min-width:70px;text-align:right;color:var(--primary)">${f(lastC.ctT+lastC.ceoTot)}</span></span></div><div class="sr"><span class="l">건보+연금+보험</span><span class="v" style="display:flex;gap:28px;"><span style="min-width:70px;text-align:right">${f(lastI.health+lastI.pension)}</span><span style="min-width:70px;text-align:right;color:var(--primary)">${f(lastC.insT)}</span></span></div><div class="sr total"><span class="l">합계</span><span class="v" style="display:flex;gap:28px;"><span style="min-width:70px;text-align:right;font-size:16px;color:#888">${f(lastI.total)}</span><span style="min-width:70px;text-align:right;font-size:16px;color:var(--primary)">${f(lastC.total)}</span></span></div></div></div>${retSec}<div class="info-box yellow" style="margin-top:16px;"><strong>⚠️ 법인전환 시 유의사항</strong>· 법인 자금을 개인적으로 사용하면 가지급금 인정이자 과세<br>· 법인은 복식부기 의무·세무조정·법인세 신고 등 관리 비용 발생<br>· 매출이 적은 경우 오히려 세부담이 증가할 수 있습니다<br>· 퇴직급여 배수는 정관에 규정해야 하며, 과다 시 손금 부인 가능</div>`;
+}
+
+onIndvChange();
+</script>
+</body>
+</html>
